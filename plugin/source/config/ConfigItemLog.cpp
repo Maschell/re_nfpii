@@ -12,6 +12,8 @@
 #include <vpad/input.h>
 #include <padscore/kpad.h>
 
+#include "debug/logger.h"
+
 #define COLOR_BACKGROUND         Color(238, 238, 238, 255)
 #define COLOR_TEXT               Color(51, 51, 51, 255)
 #define COLOR_TEXT2              Color(72, 72, 72, 255)
@@ -34,13 +36,11 @@ struct LogEntry {
 static OSMutex logMutex;
 static std::vector<LogEntry> logEntries;
 
-void ConfigItemLog_Init(void)
-{
+void ConfigItemLog_Init(void) {
     OSInitMutex(&logMutex);
 }
 
-void ConfigItemLog_PrintType(LogType type, const char* text)
-{
+void ConfigItemLog_PrintType(LogType type, const char* text) {
     OSLockMutex(&logMutex);
 
     LogEntry entry;
@@ -56,8 +56,7 @@ void ConfigItemLog_PrintType(LogType type, const char* text)
     OSUnlockMutex(&logMutex);
 }
 
-static std::string getLogStats(ConfigItemLog* item)
-{
+static std::string getLogStats(ConfigItemLog* item) {
     uint32_t numErrors = 0;
     uint32_t numWarns = 0;
     for (LogEntry& e : logEntries) {
@@ -71,8 +70,7 @@ static std::string getLogStats(ConfigItemLog* item)
     return std::to_string(numErrors) + " Error(s), " + std::to_string(numWarns) + " Warning(s)";
 }
 
-static void enterLogViewer(ConfigItemLog* item)
-{
+static void enterLogViewer(ConfigItemLog* item) {
     // Init DrawUtils
     DrawUtils::initBuffers();
     if (!DrawUtils::initFont()) {
@@ -80,7 +78,7 @@ static void enterLogViewer(ConfigItemLog* item)
     }
 
     uint32_t start = 0;
-    uint32_t end = std::min(logEntries.size(), (uint32_t) MAX_ENTRIES_PER_PAGE);
+    uint32_t end = std::min(logEntries.size(), (uint32_t)MAX_ENTRIES_PER_PAGE);
 
     bool redraw = true;
 
@@ -99,7 +97,7 @@ static void enterLogViewer(ConfigItemLog* item)
 
         // read kpads and remap the buttons we need
         for (int i = 0; i < 4; i++) {
-            if (KPADReadEx((KPADChan) i, &kpad, 1, &kpadError) > 0) {
+            if (KPADReadEx((KPADChan)i, &kpad, 1, &kpadError) > 0) {
                 if (kpadError != KPAD_ERROR_OK) {
                     continue;
                 }
@@ -117,12 +115,12 @@ static void enterLogViewer(ConfigItemLog* item)
 
         if (buttonsTriggered & VPAD_BUTTON_DOWN) {
             end = std::min(end + MAX_ENTRIES_PER_PAGE, logEntries.size());
-            start = std::max((int) end - MAX_ENTRIES_PER_PAGE, 0);
+            start = std::max((int)end - MAX_ENTRIES_PER_PAGE, 0);
             redraw = true;
         }
 
         if (buttonsTriggered & VPAD_BUTTON_UP) {
-            start = std::max(0, (int) start - MAX_ENTRIES_PER_PAGE);
+            start = std::max(0, (int)start - MAX_ENTRIES_PER_PAGE);
             end = std::min(start + MAX_ENTRIES_PER_PAGE, logEntries.size());
             redraw = true;
         }
@@ -184,59 +182,47 @@ static void enterLogViewer(ConfigItemLog* item)
     }
 }
 
-static bool ConfigItemLog_callCallback(void* context)
-{
-    return true;
+static void ConfigItemLog_onCloseCallback(void* context) {
+    return;
 }
 
-static void ConfigItemLog_onButtonPressed(void* context, WUPSConfigButtons buttons)
-{
-    ConfigItemLog* item = (ConfigItemLog*) context;
+static void ConfigItemLog_onInput(void* context, WUPSConfigSimplePadData buttons) {
+    ConfigItemLog* item = (ConfigItemLog*)context;
 
-    if (buttons & WUPS_CONFIG_BUTTON_A) {
+    if (buttons.buttons_d & WUPS_CONFIG_BUTTON_A) {
         enterLogViewer(item);
     }
 }
 
-static bool ConfigItemLog_isMovementAllowed(void* context)
-{
+static bool ConfigItemLog_isMovementAllowed(void* context) {
     return true;
 }
 
-static int32_t ConfigItemLog_getCurrentValueDisplay(void* context, char* out_buf, int32_t out_size)
-{
-    ConfigItemLog* item = (ConfigItemLog*) context;
+static int32_t ConfigItemLog_getCurrentValueDisplay(void* context, char* out_buf, int32_t out_size) {
+    ConfigItemLog* item = (ConfigItemLog*)context;
 
     strncpy(out_buf, getLogStats(item).c_str(), out_size);
     return 0;
 }
 
-static void ConfigItemLog_restoreDefault(void* context)
-{
+static void ConfigItemLog_restoreDefault(void* context) {
 }
 
-static void ConfigItemLog_onSelected(void* context, bool isSelected)
-{
+static void ConfigItemLog_onSelected(void* context, bool isSelected) {
 }
 
-static void ConfigItemLog_onDelete(void* context)
-{
-    ConfigItemLog* item = (ConfigItemLog*) context;
+static void ConfigItemLog_onDelete(void* context) {
+    ConfigItemLog* item = (ConfigItemLog*)context;
 
     free(item->configID);
-    
+
     delete item;
 }
 
-bool ConfigItemLog_AddToCategory(WUPSConfigCategoryHandle cat, const char* configID, const char* displayName)
-{
-    if (!cat) {
-        return false;
-    }
-
-    ConfigItemLog* item = new ConfigItemLog;
+WUPSConfigAPIStatus ConfigItemLog_Create(const char* configID, const char* displayName, WUPSConfigItemHandle* outHandle) {
+    auto* item = new(std::nothrow) ConfigItemLog;
     if (!item) {
-        return false;
+        return WUPSCONFIG_API_RESULT_OUT_OF_MEMORY;
     }
 
     if (configID) {
@@ -245,25 +231,66 @@ bool ConfigItemLog_AddToCategory(WUPSConfigCategoryHandle cat, const char* confi
         item->configID = nullptr;
     }
 
-    WUPSConfigCallbacks_t callbacks = {
-        .getCurrentValueDisplay         = &ConfigItemLog_getCurrentValueDisplay,
+    WUPSConfigAPIItemCallbacksV2 callbacks = {
+        .getCurrentValueDisplay = &ConfigItemLog_getCurrentValueDisplay,
         .getCurrentValueSelectedDisplay = &ConfigItemLog_getCurrentValueDisplay,
-        .onSelected                     = &ConfigItemLog_onSelected,
-        .restoreDefault                 = &ConfigItemLog_restoreDefault,
-        .isMovementAllowed              = &ConfigItemLog_isMovementAllowed,
-        .callCallback                   = &ConfigItemLog_callCallback,
-        .onButtonPressed                = &ConfigItemLog_onButtonPressed,
-        .onDelete                       = &ConfigItemLog_onDelete
+        .onSelected = &ConfigItemLog_onSelected,
+        .restoreDefault = &ConfigItemLog_restoreDefault,
+        .isMovementAllowed = &ConfigItemLog_isMovementAllowed,
+        .onCloseCallback = &ConfigItemLog_onCloseCallback,
+        .onInput = &ConfigItemLog_onInput,
+        .onInputEx = nullptr,
+        .onDelete = &ConfigItemLog_onDelete
     };
 
-    if (WUPSConfigItem_Create(&item->handle, configID, displayName, callbacks, item) < 0) {
-        delete item;
-        return false;
+    const WUPSConfigAPIItemOptionsV2 options = {
+        .displayName = displayName,
+        .context = item,
+        .callbacks = callbacks,
+    };
+
+    if (const WUPSConfigAPIStatus err = WUPSConfigAPI_Item_Create(options, &item->handle); err !=
+        WUPSCONFIG_API_RESULT_SUCCESS) {
+        DEBUG_FUNCTION_LINE("Failed to create config item.\n");
+        ConfigItemLog_onDelete(item);
+        return err;
     }
 
-    if (WUPSConfigCategory_AddItem(cat, item->handle) < 0) {
-        return false;
+    *outHandle = item->handle;
+    return WUPSCONFIG_API_RESULT_SUCCESS;
+}
+
+WUPSConfigAPIStatus ConfigItemLog_AddToCategory(WUPSConfigCategoryHandle cat, const char* configID, const char* displayName) {
+    WUPSConfigItemHandle itemHandle;
+    WUPSConfigAPIStatus res;
+    if ((res = ConfigItemLog_Create(configID,
+                                    displayName,
+                                    &itemHandle)) != WUPSCONFIG_API_RESULT_SUCCESS) {
+        return res;
     }
 
-    return true;
+    if ((res = WUPSConfigAPI_Category_AddItem(cat, itemHandle)) != WUPSCONFIG_API_RESULT_SUCCESS) {
+        WUPSConfigAPI_Item_Destroy(itemHandle);
+        return res;
+    }
+    return WUPSCONFIG_API_RESULT_SUCCESS;
+}
+
+std::optional<ConfigItemLogCPP> ConfigItemLogCPP::Create(std::optional<std::string> identifier, std::string_view displayName, WUPSConfigAPIStatus& err) noexcept {
+    WUPSConfigItemHandle itemHandle;
+    if ((err = ConfigItemLog_Create(identifier ? identifier->data() : nullptr,
+                                    displayName.data(),
+                                    &itemHandle)) != WUPSCONFIG_API_RESULT_SUCCESS) {
+        return std::nullopt;
+    }
+    return ConfigItemLogCPP(itemHandle);
+}
+
+ConfigItemLogCPP ConfigItemLogCPP::Create(std::optional<std::string> identifier, std::string_view displayName) {
+    WUPSConfigAPIStatus err;
+    auto result = Create(std::move(identifier), displayName, err);
+    if (!result) {
+        throw std::runtime_error(std::string("Failed to create ConfigItemLogCPP: ").append(WUPSConfigAPI_GetStatusStr(err)));
+    }
+    return std::move(*result);
 }

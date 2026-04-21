@@ -1,0 +1,13 @@
+#pragma once
+#include <wups/button_combo/defines.h>
+
+#define BUTTON_COMBO_QUICK_SELECT_CONFIG_ID_DEPRECATED "quickSelectCombo"
+#define BUTTON_COMBO_QUICK_SELECT_CONFIG_ID "quickSelectComboV2"
+#define BUTTON_COMBO_TOGGLE_EMULATION_CONFIG_ID_DEPRECATED "toggleEmulationCombo"
+#define BUTTON_COMBO_TOGGLE_EMULATION_CONFIG_ID "toggleEmulationComboV2"
+
+extern WUPSButtonCombo_ComboHandle sQuickSelectButtonComboHandle;
+extern WUPSButtonCombo_ComboHandle sToggleEmulationButtonComboHandle;
+
+void migrateStorage();
+void RegisterButtonCombos();
