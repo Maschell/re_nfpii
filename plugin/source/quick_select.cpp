@@ -156,7 +156,8 @@ std::string string_format(const std::string& format, Args... args)
     return std::string(buf.get(), buf.get() + size - 1); // We don't want the '\0' inside
 }
 
-WUPSButtonCombo_ComboHandle RegisterButtonCombo(const std::string_view label, const WUPSButtonCombo_Buttons buttonCombo, const WUPSButtonCombo_ComboCallback callback)
+WUPSButtonCombo_ComboHandle RegisterButtonCombo(const std::string_view label, const WUPSButtonCombo_Buttons buttonCombo,
+    const WUPSButtonCombo_Buttons buttonComboFallback, const WUPSButtonCombo_ComboCallback callback)
 {
     const auto buttonComboLabel = string_format("re_nfpii: %s", label.data());
     WUPSButtonCombo_ComboStatus status = WUPS_BUTTON_COMBO_COMBO_STATUS_INVALID_STATUS;
@@ -167,6 +168,15 @@ WUPSButtonCombo_ComboHandle RegisterButtonCombo(const std::string_view label, co
                                                         nullptr,
                                                         status,
                                                         err);
+    if ((!res || err != WUPS_BUTTON_COMBO_ERROR_SUCCESS) && buttonCombo == 0) {
+        // If empty buttonCombo is not allowed, fall back to a different (impossible) combo instead
+        res = WUPSButtonComboAPI::CreateComboPressDown(buttonComboLabel,
+                                                            buttonComboFallback,
+                                                            callback,
+                                                            nullptr,
+                                                            status,
+                                                            err);
+    }
     if (!res || err != WUPS_BUTTON_COMBO_ERROR_SUCCESS) {
         const std::string errorMsg = string_format("re_nfpii: Failed to register button combo \"%s\"", label.data());
         DEBUG_FUNCTION_LINE("%s", errorMsg.c_str());
@@ -193,6 +203,6 @@ WUPSButtonCombo_ComboHandle RegisterButtonCombo(const std::string_view label, co
 
 void RegisterButtonCombos()
 {
-    sQuickSelectButtonComboHandle = RegisterButtonCombo("Quick Select", currentQuickSelectCombination, cycleQuickSelect);
-    sToggleEmulationButtonComboHandle = RegisterButtonCombo("Toggle Emulation", currentToggleEmulationCombination, toggleEmulation);
+    sQuickSelectButtonComboHandle = RegisterButtonCombo("Quick Select", currentQuickSelectCombination, QUICK_SELECT_BUTTON_COMBO_FALLBACK, cycleQuickSelect);
+    sToggleEmulationButtonComboHandle = RegisterButtonCombo("Toggle Emulation", currentToggleEmulationCombination, TOGGLE_EMULATION_BUTTON_COMBO_FALLBACK, toggleEmulation);
 }

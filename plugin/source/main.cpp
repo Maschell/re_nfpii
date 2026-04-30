@@ -42,10 +42,6 @@ WUPS_USE_WUT_DEVOPTAB();
 
 uint32_t currentRemoveAfterOption = 0;
 
-// TODO: we need any default value for the button combos
-constexpr WUPSButtonCombo_Buttons QUICK_SELECT_BUTTON_COMBO_DEFAULT = WUPS_BUTTON_COMBO_BUTTON_STICK_L | WUPS_BUTTON_COMBO_BUTTON_R;
-constexpr WUPSButtonCombo_Buttons TOGGLE_EMULATION_BUTTON_COMBO_DEFAULT = WUPS_BUTTON_COMBO_BUTTON_STICK_L | WUPS_BUTTON_COMBO_BUTTON_L;
-
 WUPSButtonCombo_Buttons currentQuickSelectCombination = QUICK_SELECT_BUTTON_COMBO_DEFAULT;
 WUPSButtonCombo_Buttons currentToggleEmulationCombination = TOGGLE_EMULATION_BUTTON_COMBO_DEFAULT;
 
