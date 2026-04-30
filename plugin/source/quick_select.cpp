@@ -19,7 +19,8 @@ extern WUPSButtonCombo_Buttons currentQuickSelectCombination;
 extern WUPSButtonCombo_Buttons currentToggleEmulationCombination;
 
 
-static uint32_t migrateButtonCombo(const uint32_t buttons) {
+static uint32_t migrateButtonCombo(const uint32_t buttons)
+{
     uint32_t conv_buttons = 0;
 
     if (buttons & VPAD_BUTTON_A) {
@@ -84,7 +85,8 @@ static uint32_t migrateButtonCombo(const uint32_t buttons) {
 }
 
 
-void migrateStorage() {
+void migrateStorage()
+{
     uint32_t oldButtonCombo = 0;
     if (WUPSStorageAPI::Get(BUTTON_COMBO_QUICK_SELECT_CONFIG_ID_DEPRECATED, oldButtonCombo) == WUPS_STORAGE_ERROR_SUCCESS) {
         DEBUG_FUNCTION_LINE("Found deprecated config in storage. Storage will be migrated");
@@ -102,7 +104,8 @@ void migrateStorage() {
     }
 }
 
-static void cycleQuickSelect(WUPSButtonCombo_ControllerTypes, WUPSButtonCombo_ComboHandle, void*) {
+static void cycleQuickSelect(WUPSButtonCombo_ControllerTypes, WUPSButtonCombo_ComboHandle, void*)
+{
     if (ConfigItemSelectAmiibo_GetFavorites().empty()) {
         return;
     }
@@ -125,7 +128,8 @@ static void cycleQuickSelect(WUPSButtonCombo_ControllerTypes, WUPSButtonCombo_Co
 }
 
 
-static void toggleEmulation(WUPSButtonCombo_ControllerTypes, WUPSButtonCombo_ComboHandle, void*) {
+static void toggleEmulation(WUPSButtonCombo_ControllerTypes, WUPSButtonCombo_ComboHandle, void*)
+{
     NfpiiEmulationState state = NfpiiGetEmulationState();
     std::string notifText;
     if (state == NFPII_EMULATION_ON) {
@@ -143,7 +147,8 @@ static void toggleEmulation(WUPSButtonCombo_ControllerTypes, WUPSButtonCombo_Com
 
 
 template <typename... Args>
-std::string string_format(const std::string& format, Args... args) {
+std::string string_format(const std::string& format, Args... args)
+{
     int size_s = std::snprintf(nullptr, 0, format.c_str(), args...) + 1; // Extra space for '\0'
     auto size = static_cast<size_t>(size_s);
     auto buf = std::make_unique<char[]>(size);
@@ -151,8 +156,8 @@ std::string string_format(const std::string& format, Args... args) {
     return std::string(buf.get(), buf.get() + size - 1); // We don't want the '\0' inside
 }
 
-
-WUPSButtonCombo_ComboHandle RegisterButtonCombo(const std::string_view label, const WUPSButtonCombo_Buttons buttonCombo, const WUPSButtonCombo_ComboCallback callback) {
+WUPSButtonCombo_ComboHandle RegisterButtonCombo(const std::string_view label, const WUPSButtonCombo_Buttons buttonCombo, const WUPSButtonCombo_ComboCallback callback)
+{
     const auto buttonComboLabel = string_format("re_nfpii: %s", label.data());
     WUPSButtonCombo_ComboStatus status = WUPS_BUTTON_COMBO_COMBO_STATUS_INVALID_STATUS;
     WUPSButtonCombo_Error err = WUPS_BUTTON_COMBO_ERROR_UNKNOWN_ERROR;
@@ -186,7 +191,8 @@ WUPSButtonCombo_ComboHandle RegisterButtonCombo(const std::string_view label, co
     return WUPSButtonCombo_ComboHandle(nullptr);
 }
 
-void RegisterButtonCombos() {
+void RegisterButtonCombos()
+{
     sQuickSelectButtonComboHandle = RegisterButtonCombo("Quick Select", currentQuickSelectCombination, cycleQuickSelect);
     sToggleEmulationButtonComboHandle = RegisterButtonCombo("Toggle Emulation", currentToggleEmulationCombination, toggleEmulation);
 }

@@ -19,7 +19,8 @@ WUPSConfigAPIStatus ConfigItemLog_Create(const char* configID, const char* displ
 
 WUPSConfigAPIStatus ConfigItemLog_AddToCategory(WUPSConfigCategoryHandle cat, const char* configID, const char* displayName);
 
-class ConfigItemLogCPP : public WUPSConfigItem {
+class ConfigItemLogCPP : public WUPSConfigItem
+{
 public:
     static std::optional<ConfigItemLogCPP> Create(std::optional<std::string> identifier,
                                                   std::string_view displayName,
@@ -29,6 +30,7 @@ public:
                                    std::string_view displayName);
 
 private:
-    explicit ConfigItemLogCPP(WUPSConfigItemHandle itemHandle) : WUPSConfigItem(itemHandle) {
+    explicit ConfigItemLogCPP(WUPSConfigItemHandle itemHandle) : WUPSConfigItem(itemHandle)
+    {
     }
 };

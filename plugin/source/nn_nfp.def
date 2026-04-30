@@ -13,7 +13,7 @@ NfpiiSetTagEmulationPath
 NfpiiGetTagEmulationPath
 NfpiiQueueNFCGetTagInfo
 NfpiiSetLogHandler
-NfpiiSetPluginloaded
+NfpiiSetPluginLoaded
 
 // nn_nfp exports
 AntennaCheck__Q2_2nn3nfpFv

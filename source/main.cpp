@@ -22,23 +22,28 @@ WUMS_MODULE_AUTHOR("GaryOderNichts");
 WUMS_MODULE_VERSION(VERSION_STRING(VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH));
 WUMS_MODULE_LICENSE("GPLv2");
 
-namespace  {
-    static bool sIsPluginLoaded = false;
-    static bool sIsPluginLoadedInfoShown = false;
+namespace
+{
 
-    void ShowNotification(std::string_view notification) {
-        auto err1 = NotificationModule_SetDefaultValue(NOTIFICATION_MODULE_NOTIFICATION_TYPE_INFO,
-                                                       NOTIFICATION_MODULE_DEFAULT_OPTION_KEEP_UNTIL_SHOWN, true);
-        auto err2 = NotificationModule_SetDefaultValue(NOTIFICATION_MODULE_NOTIFICATION_TYPE_INFO,
-                                                       NOTIFICATION_MODULE_DEFAULT_OPTION_DURATION_BEFORE_FADE_OUT,
-                                                       15.0f);
+static bool sIsPluginLoaded = false;
+static bool sIsPluginLoadedInfoShown = false;
 
-        if (err1 != NOTIFICATION_MODULE_RESULT_SUCCESS || err2 != NOTIFICATION_MODULE_RESULT_SUCCESS) return;
+void ShowNotification(std::string_view notification)
+{
+    auto err1 = NotificationModule_SetDefaultValue(NOTIFICATION_MODULE_NOTIFICATION_TYPE_INFO,
+                                                    NOTIFICATION_MODULE_DEFAULT_OPTION_KEEP_UNTIL_SHOWN, true);
+    auto err2 = NotificationModule_SetDefaultValue(NOTIFICATION_MODULE_NOTIFICATION_TYPE_INFO,
+                                                    NOTIFICATION_MODULE_DEFAULT_OPTION_DURATION_BEFORE_FADE_OUT,
+                                                    15.0f);
 
-        NotificationModule_AddInfoNotification(notification.data());
+    if (err1 != NOTIFICATION_MODULE_RESULT_SUCCESS || err2 != NOTIFICATION_MODULE_RESULT_SUCCESS) {
+        return;
     }
 
+    NotificationModule_AddInfoNotification(notification.data());
 }
+
+} // anonymous namespace
 
 WUMS_INITIALIZE(myargs)
 {
@@ -69,7 +74,8 @@ WUMS_APPLICATION_ENDS()
     re::nfpii::tagManager.Finalize();
 }
 
-WUMS_ALL_APPLICATION_STARTS_DONE() {
+WUMS_ALL_APPLICATION_STARTS_DONE()
+{
     if(!sIsPluginLoadedInfoShown && !sIsPluginLoaded) {
         ShowNotification("re_nfpii module is loaded but the companion plugin is not loaded");
         sIsPluginLoadedInfoShown = true;
@@ -137,7 +143,7 @@ NFCError NfpiiQueueNFCGetTagInfo(NFCGetTagInfoCallbackFn callback, void* arg)
     return re::nfpii::tagManager.QueueNFCGetTagInfo(callback, arg);
 }
 
-void NfpiiSetPluginloaded()
+void NfpiiSetPluginLoaded()
 {
     sIsPluginLoaded = true;
 }
@@ -151,4 +157,4 @@ WUMS_EXPORT_FUNCTION(NfpiiSetRemoveAfterSeconds);
 WUMS_EXPORT_FUNCTION(NfpiiSetTagEmulationPath);
 WUMS_EXPORT_FUNCTION(NfpiiGetTagEmulationPath);
 WUMS_EXPORT_FUNCTION(NfpiiQueueNFCGetTagInfo);
-WUMS_EXPORT_FUNCTION(NfpiiSetPluginloaded);
+WUMS_EXPORT_FUNCTION(NfpiiSetPluginLoaded);

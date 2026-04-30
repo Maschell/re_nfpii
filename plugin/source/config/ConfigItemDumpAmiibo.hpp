@@ -24,7 +24,8 @@ WUPSConfigAPIStatus ConfigItemDumpAmiibo_Create(const char* configID, const char
 WUPSConfigAPIStatus ConfigItemDumpAmiibo_AddToCategory(WUPSConfigCategoryHandle cat, const char* configID, const char* displayName,
                                                        const char* dumpFolder);
 
-class ConfigItemDumpAmiiboCPP : public WUPSConfigItem {
+class ConfigItemDumpAmiiboCPP : public WUPSConfigItem
+{
 public:
     static std::optional<ConfigItemDumpAmiiboCPP> Create(std::optional<std::string> identifier,
                                                          std::string_view displayName,
@@ -36,6 +37,7 @@ public:
                                           const char* dumpFolder);
 
 private:
-    explicit ConfigItemDumpAmiiboCPP(WUPSConfigItemHandle itemHandle) : WUPSConfigItem(itemHandle) {
+    explicit ConfigItemDumpAmiiboCPP(WUPSConfigItemHandle itemHandle) : WUPSConfigItem(itemHandle)
+    {
     }
 };

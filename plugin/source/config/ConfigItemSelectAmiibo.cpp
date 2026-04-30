@@ -58,11 +58,13 @@ static std::vector<std::string> favorites;
 static bool favoritesUpdated = false;
 static bool favoritesPerTitle = false;
 
-std::vector<std::string>& ConfigItemSelectAmiibo_GetFavorites(void) {
+std::vector<std::string>& ConfigItemSelectAmiibo_GetFavorites(void)
+{
     return favorites;
 }
 
-void ConfigItemSelectAmiibo_Init(std::string rootPath, bool favoritesPerTitle) {
+void ConfigItemSelectAmiibo_Init(std::string rootPath, bool favoritesPerTitle)
+{
     favorites.clear();
     favoritesUpdated = false;
 
@@ -97,7 +99,8 @@ void ConfigItemSelectAmiibo_Init(std::string rootPath, bool favoritesPerTitle) {
     }
 }
 
-static void saveFavorites(ConfigItemSelectAmiibo* item) {
+static void saveFavorites(ConfigItemSelectAmiibo* item)
+{
     if (!favoritesUpdated || favorites.empty()) {
         return;
     }
@@ -127,7 +130,8 @@ static void saveFavorites(ConfigItemSelectAmiibo* item) {
     favoritesUpdated = false;
 }
 
-static void enterSelectionMenu(ConfigItemSelectAmiibo* item) {
+static void enterSelectionMenu(ConfigItemSelectAmiibo* item)
+{
     std::vector<ListEntry> entries;
     bool highlightSelected = true;
     bool openTidFolder = true;
@@ -144,7 +148,7 @@ static void enterSelectionMenu(ConfigItemSelectAmiibo* item) {
     }
 
     while (true) {
-    refresh: ;
+        refresh: ;
         entries.clear();
 
         // Add top entry
@@ -205,33 +209,32 @@ static void enterSelectionMenu(ConfigItemSelectAmiibo* item) {
 
         // sort files
         std::sort(entries.begin(), entries.end(),
-                  [](ListEntry& a, ListEntry& b) {
-                      // top dir entry is always at the top
-                      if (a.type == LIST_ENTRY_TYPE_TOP) {
-                          return true;
-                      } else if (b.type == LIST_ENTRY_TYPE_TOP) {
-                          return false;
-                      }
+            [](ListEntry& a, ListEntry& b) {
+                // top dir entry is always at the top
+                if (a.type == LIST_ENTRY_TYPE_TOP) {
+                    return true;
+                } else if (b.type == LIST_ENTRY_TYPE_TOP) {
+                    return false;
+                }
 
-                      // list dirs above files
-                      if (a.type == LIST_ENTRY_TYPE_DIR && b.type == LIST_ENTRY_TYPE_FILE) {
-                          return true;
-                      } else if (a.type == LIST_ENTRY_TYPE_FILE && b.type == LIST_ENTRY_TYPE_DIR) {
-                          return false;
-                      }
+                // list dirs above files
+                if (a.type == LIST_ENTRY_TYPE_DIR && b.type == LIST_ENTRY_TYPE_FILE) {
+                    return true;
+                } else if (a.type == LIST_ENTRY_TYPE_FILE && b.type == LIST_ENTRY_TYPE_DIR) {
+                    return false;
+                }
 
-                      // sort the rest alphabetically
-                      return strcasecmp(a.name.c_str(), b.name.c_str()) <= 0;
-                  }
+                // sort the rest alphabetically
+                return strcasecmp(a.name.c_str(), b.name.c_str()) <= 0;
+            }
         );
-
 
         // Check if the current amiibo is part of the entries, and highlight if it is
         int32_t selected = -1;
         if (!item->selectedAmiibo.empty()) {
             for (size_t i = 0; i < entries.size(); ++i) {
                 if (std::string(item->currentPath + entries[i].name).compare(item->selectedAmiibo) == 0) {
-                    selected = (int)i;
+                    selected = (int) i;
                     break;
                 }
             }
@@ -378,7 +381,7 @@ static void enterSelectionMenu(ConfigItemSelectAmiibo* item) {
 
                     if (entry.type == LIST_ENTRY_TYPE_FILE) {
                         // draw selected icon
-                        if (selected != -1 && i == (uint32_t)selected) {
+                        if (selected != -1 && i == (uint32_t) selected) {
                             DrawUtils::print(16 * 2, index + 6 + 16, "\u25c9");
                         } else {
                             DrawUtils::print(16 * 2, index + 6 + 16, "\u25cb");
@@ -387,8 +390,7 @@ static void enterSelectionMenu(ConfigItemSelectAmiibo* item) {
                         if (entry.isFavorite) {
                             // draw favorite icon
                             for (uint32_t i = 0; i < sizeof(fav_icon) / sizeof(Color); ++i) {
-                                DrawUtils::drawPixel(SCREEN_WIDTH - (16 * 3) + (i % 20), index + 4 + (i / 20),
-                                                     fav_icon[i]);
+                                DrawUtils::drawPixel(SCREEN_WIDTH - (16 * 3) + (i % 20), index + 4 + (i / 20), fav_icon[i]);
                             }
                         }
                     } else if (entry.type == LIST_ENTRY_TYPE_DIR) {
@@ -438,8 +440,7 @@ static void enterSelectionMenu(ConfigItemSelectAmiibo* item) {
                 // draw back button
                 DrawUtils::setFontSize(18);
                 const char* exitHint = "\ue001 Back";
-                DrawUtils::print(SCREEN_WIDTH / 2 + DrawUtils::getTextWidth(exitHint) / 2, SCREEN_HEIGHT - 10, exitHint,
-                                 true);
+                DrawUtils::print(SCREEN_WIDTH / 2 + DrawUtils::getTextWidth(exitHint) / 2, SCREEN_HEIGHT - 10, exitHint, true);
 
                 DrawUtils::endDraw();
                 redraw = false;
@@ -448,8 +449,9 @@ static void enterSelectionMenu(ConfigItemSelectAmiibo* item) {
     }
 }
 
-static void ConfigItemSelectAmiibo_onCloseCallback(void* context) {
-    ConfigItemSelectAmiibo* item = (ConfigItemSelectAmiibo*)context;
+static void ConfigItemSelectAmiibo_onCloseCallback(void* context)
+{
+    ConfigItemSelectAmiibo* item = (ConfigItemSelectAmiibo*) context;
 
     saveFavorites(item);
 
@@ -458,20 +460,23 @@ static void ConfigItemSelectAmiibo_onCloseCallback(void* context) {
     }
 }
 
-static void ConfigItemSelectAmiibo_onInput(void* context, WUPSConfigSimplePadData buttons) {
-    ConfigItemSelectAmiibo* item = (ConfigItemSelectAmiibo*)context;
+static void ConfigItemSelectAmiibo_onInput(void* context, WUPSConfigSimplePadData buttons)
+{
+    ConfigItemSelectAmiibo* item = (ConfigItemSelectAmiibo*) context;
 
     if (buttons.buttons_d & WUPS_CONFIG_BUTTON_A) {
         enterSelectionMenu(item);
     }
 }
 
-static bool ConfigItemSelectAmiibo_isMovementAllowed(void* context) {
+static bool ConfigItemSelectAmiibo_isMovementAllowed(void* context)
+{
     return true;
 }
 
-static int32_t ConfigItemSelectAmiibo_getCurrentValueDisplay(void* context, char* out_buf, int32_t out_size) {
-    ConfigItemSelectAmiibo* item = (ConfigItemSelectAmiibo*)context;
+static int32_t ConfigItemSelectAmiibo_getCurrentValueDisplay(void* context, char* out_buf, int32_t out_size)
+{
+    ConfigItemSelectAmiibo* item = (ConfigItemSelectAmiibo*) context;
 
     if (item->selectedAmiibo.empty()) {
         strncpy(out_buf, "None", out_size);
@@ -490,8 +495,9 @@ static int32_t ConfigItemSelectAmiibo_getCurrentValueDisplay(void* context, char
     return 0;
 }
 
-static void ConfigItemSelectAmiibo_restoreDefault(void* context) {
-    ConfigItemSelectAmiibo* item = (ConfigItemSelectAmiibo*)context;
+static void ConfigItemSelectAmiibo_restoreDefault(void* context)
+{
+    ConfigItemSelectAmiibo* item = (ConfigItemSelectAmiibo*) context;
     item->selectedAmiibo = "";
     item->currentPath = item->rootPath;
 }
@@ -502,7 +508,8 @@ static void ConfigItemSelectAmiibo_onSelected(void* context, bool isSelected) {
 WUPSConfigAPIStatus ConfigItemSelectAmiibo_Create(const char* configID, const char* displayName,
                                                     const char* amiiboFolder, const char* currentAmiibo,
                                                     AmiiboSelectedCallback callback,
-                                                    WUPSConfigItemHandle* outHandle) {
+                                                    WUPSConfigItemHandle* outHandle)
+{
     if (!displayName || !amiiboFolder || !currentAmiibo || outHandle == nullptr) {
         return WUPSCONFIG_API_RESULT_INVALID_ARGUMENT;
     }
@@ -546,8 +553,8 @@ WUPSConfigAPIStatus ConfigItemSelectAmiibo_Create(const char* configID, const ch
         .callbacks = callbacks,
     };
 
-    if (const WUPSConfigAPIStatus err = WUPSConfigAPI_Item_Create(options, &item->handle); err !=
-        WUPSCONFIG_API_RESULT_SUCCESS) {
+    WUPSConfigAPIStatus err = WUPSConfigAPI_Item_Create(options, &item->handle);
+    if (err != WUPSCONFIG_API_RESULT_SUCCESS) {
         DEBUG_FUNCTION_LINE("Failed to create config item.\n");
         ConfigItemSelectAmiibo_onDelete(item);
         return err;
@@ -557,7 +564,8 @@ WUPSConfigAPIStatus ConfigItemSelectAmiibo_Create(const char* configID, const ch
     return WUPSCONFIG_API_RESULT_SUCCESS;
 }
 
-WUPSConfigAPIStatus ConfigItemSelectAmiibo_AddToCategory(WUPSConfigCategoryHandle cat, const char* configID, const char* displayName, const char* amiiboFolder, const char* currentAmiibo, AmiiboSelectedCallback callback) {
+WUPSConfigAPIStatus ConfigItemSelectAmiibo_AddToCategory(WUPSConfigCategoryHandle cat, const char* configID, const char* displayName, const char* amiiboFolder, const char* currentAmiibo, AmiiboSelectedCallback callback)
+{
     WUPSConfigItemHandle itemHandle;
     WUPSConfigAPIStatus res;
     if ((res = ConfigItemSelectAmiibo_Create(configID,
@@ -575,7 +583,8 @@ WUPSConfigAPIStatus ConfigItemSelectAmiibo_AddToCategory(WUPSConfigCategoryHandl
     return WUPSCONFIG_API_RESULT_SUCCESS;
 }
 
-std::optional<ConfigItemSelectAmiiboCPP> ConfigItemSelectAmiiboCPP::Create(std::optional<std::string> identifier, std::string_view displayName, const char* amiiboFolder, const char* currentAmiibo, AmiiboSelectedCallback callback, WUPSConfigAPIStatus& err) noexcept {
+std::optional<ConfigItemSelectAmiiboCPP> ConfigItemSelectAmiiboCPP::Create(std::optional<std::string> identifier, std::string_view displayName, const char* amiiboFolder, const char* currentAmiibo, AmiiboSelectedCallback callback, WUPSConfigAPIStatus& err) noexcept
+{
     WUPSConfigItemHandle itemHandle;
     if ((err = ConfigItemSelectAmiibo_Create(identifier ? identifier->data() : nullptr,
                                               displayName.data(),
@@ -583,16 +592,19 @@ std::optional<ConfigItemSelectAmiiboCPP> ConfigItemSelectAmiiboCPP::Create(std::
                                               callback,
                                               &itemHandle)) != WUPSCONFIG_API_RESULT_SUCCESS) {
         return std::nullopt;
-                                              }
+    }
+
     return ConfigItemSelectAmiiboCPP(itemHandle);
 }
 
-ConfigItemSelectAmiiboCPP ConfigItemSelectAmiiboCPP::Create(std::optional<std::string> identifier, std::string_view displayName, const char* amiiboFolder, const char* currentAmiibo, AmiiboSelectedCallback callback) {
+ConfigItemSelectAmiiboCPP ConfigItemSelectAmiiboCPP::Create(std::optional<std::string> identifier, std::string_view displayName, const char* amiiboFolder, const char* currentAmiibo, AmiiboSelectedCallback callback)
+{
     WUPSConfigAPIStatus err;
     auto result = Create(std::move(identifier), displayName, amiiboFolder, currentAmiibo, callback, err);
     if (!result) {
         throw std::runtime_error(std::string("Failed to create ConfigItemSelectAmiiboCPP: ").append(WUPSConfigAPI_GetStatusStr(err)));
     }
+
     return std::move(*result);
 }
 

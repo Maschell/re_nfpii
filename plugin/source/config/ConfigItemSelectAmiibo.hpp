@@ -30,7 +30,8 @@ WUPSConfigAPIStatus ConfigItemSelectAmiibo_AddToCategory(WUPSConfigCategoryHandl
                                                          const char* amiiboFolder, const char* currentAmiibo,
                                                          AmiiboSelectedCallback callback);
 
-class ConfigItemSelectAmiiboCPP : public WUPSConfigItem {
+class ConfigItemSelectAmiiboCPP : public WUPSConfigItem
+{
 public:
     static std::optional<ConfigItemSelectAmiiboCPP> Create(std::optional<std::string> identifier,
                                                            std::string_view displayName,
@@ -44,6 +45,7 @@ public:
                                             AmiiboSelectedCallback callback);
 
 private:
-    explicit ConfigItemSelectAmiiboCPP(WUPSConfigItemHandle itemHandle) : WUPSConfigItem(itemHandle) {
+    explicit ConfigItemSelectAmiiboCPP(WUPSConfigItemHandle itemHandle) : WUPSConfigItem(itemHandle)
+    {
     }
 };

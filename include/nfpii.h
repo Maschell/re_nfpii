@@ -52,7 +52,7 @@ NFCError NfpiiQueueNFCGetTagInfo(NFCGetTagInfoCallbackFn callback, void* arg);
 
 void NfpiiSetLogHandler(NfpiiLogHandler handler);
 
-void NfpiiSetPluginloaded();
+void NfpiiSetPluginLoaded();
 
 #ifdef __cplusplus
 }

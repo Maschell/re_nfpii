@@ -51,16 +51,17 @@ WUPSButtonCombo_Buttons currentToggleEmulationCombination = TOGGLE_EMULATION_BUT
 
 bool favoritesPerTitle = false;
 
-static void nfpiiLogHandler(NfpiiLogVerbosity verb, const char* message) {
-    ConfigItemLog_PrintType((LogType)verb, message);
+static void nfpiiLogHandler(NfpiiLogVerbosity verb, const char* message)
+{
+    ConfigItemLog_PrintType((LogType) verb, message);
 }
 
 WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle rootHandle);
 
 void ConfigMenuClosedCallback();
 
-
-INITIALIZE_PLUGIN() {
+INITIALIZE_PLUGIN()
+{
     if (!WHBLogModuleInit()) {
         WHBLogCafeInit();
         WHBLogUdpInit();
@@ -138,11 +139,13 @@ INITIALIZE_PLUGIN() {
     RegisterButtonCombos();
 }
 
-DEINITIALIZE_PLUGIN() {
+DEINITIALIZE_PLUGIN()
+{
     NfpiiSetLogHandler(nullptr);
 }
 
-ON_APPLICATION_START() {
+ON_APPLICATION_START()
+{
     if (!WHBLogModuleInit()) {
         WHBLogCafeInit();
         WHBLogUdpInit();
@@ -151,31 +154,36 @@ ON_APPLICATION_START() {
     // Make sure favorites are refreshed for the new title
     ConfigItemSelectAmiibo_Init(TAG_EMULATION_PATH, favoritesPerTitle);
 
-    NfpiiSetPluginloaded();
+    NfpiiSetPluginLoaded();
 }
 
-static void stateChangedCallback(ConfigItemMultipleValues* values, uint32_t index) {
+static void stateChangedCallback(ConfigItemMultipleValues* values, uint32_t index)
+{
     WUPSStorageAPI::Store("emulationState", index);
-    NfpiiSetEmulationState((NfpiiEmulationState)index);
+    NfpiiSetEmulationState((NfpiiEmulationState) index);
 }
 
-static void removeAfterChangedCallback(ConfigItemMultipleValues* values, uint32_t index) {
+static void removeAfterChangedCallback(ConfigItemMultipleValues* values, uint32_t index)
+{
     currentRemoveAfterOption = index;
-    WUPSStorageAPI::Store("removeAfter", (int32_t)currentRemoveAfterOption);
+    WUPSStorageAPI::Store("removeAfter", (int32_t) currentRemoveAfterOption);
     NfpiiSetRemoveAfterSeconds(index / 2.0f);
 }
 
-static void uuidRandomizationChangedCallback(ConfigItemMultipleValues* values, uint32_t index) {
-    NfpiiSetUUIDRandomizationState((NfpiiUUIDRandomizationState)index);
+static void uuidRandomizationChangedCallback(ConfigItemMultipleValues* values, uint32_t index)
+{
+    NfpiiSetUUIDRandomizationState((NfpiiUUIDRandomizationState) index);
 }
 
-static void amiiboSelectedCallback(ConfigItemSelectAmiibo* amiibos, const char* filePath) {
+static void amiiboSelectedCallback(ConfigItemSelectAmiibo* amiibos, const char* filePath)
+{
     std::string filePathStr = filePath;
     WUPSStorageAPI::Store("currentPath", filePathStr);
     NfpiiSetTagEmulationPath(filePath);
 }
 
-static void favoritesPerTitleCallback(ConfigItemBoolean* item, bool enable) {
+static void favoritesPerTitleCallback(ConfigItemBoolean* item, bool enable)
+{
     favoritesPerTitle = enable;
     WUPSStorageAPI::Store("favoritesPerTitle", favoritesPerTitle);
 
@@ -183,18 +191,21 @@ static void favoritesPerTitleCallback(ConfigItemBoolean* item, bool enable) {
     ConfigItemSelectAmiibo_Init(TAG_EMULATION_PATH, favoritesPerTitle);
 }
 
-static void quickSelectComboCallback(ConfigItemButtonCombo* item, uint32_t newValue) {
+static void quickSelectComboCallback(ConfigItemButtonCombo* item, uint32_t newValue)
+{
     currentQuickSelectCombination = static_cast<WUPSButtonCombo_Buttons>(newValue);
     WUPSStorageAPI::Store(BUTTON_COMBO_QUICK_SELECT_CONFIG_ID, currentQuickSelectCombination);
 }
 
-static void toggleEmulationComboCallback(ConfigItemButtonCombo* item, uint32_t newValue) {
+static void toggleEmulationComboCallback(ConfigItemButtonCombo* item, uint32_t newValue)
+{
     currentToggleEmulationCombination = static_cast<WUPSButtonCombo_Buttons>(newValue);
     WUPSStorageAPI::Store(BUTTON_COMBO_TOGGLE_EMULATION_CONFIG_ID, currentToggleEmulationCombination);
 }
 
 
-WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle rootHandle) {
+WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle rootHandle)
+{
     WUPSConfigCategory root = WUPSConfigCategory(rootHandle);
     try {
         auto settingsCat = WUPSConfigCategory::Create("Settings");
@@ -285,6 +296,7 @@ WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle ro
     return WUPSCONFIG_API_CALLBACK_RESULT_SUCCESS;
 }
 
-void ConfigMenuClosedCallback() {
+void ConfigMenuClosedCallback()
+{
     WUPSStorageAPI::SaveStorage();
 }
