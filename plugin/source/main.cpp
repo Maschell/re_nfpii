@@ -3,6 +3,7 @@
 #include <wups/config/WUPSConfigItemMultipleValues.h>
 #include <wups/config/WUPSConfigItemBoolean.h>
 #include <wups/config/WUPSConfigItemButtonCombo.h>
+#include <wups/config/WUPSConfigItemStub.h>
 #include <wups/button_combo/api.h>
 #include <string>
 #include <map>
@@ -267,22 +268,27 @@ WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle ro
 
         settingsCat.add(WUPSConfigItemBoolean::Create("favorites_per_title", "Per-Title Favorites", false, favoritesPerTitle, favoritesPerTitleCallback));
 
-        // TODO default combo?
-        settingsCat.add(WUPSConfigItemButtonCombo::Create("quick_select_combination", "Quick Select Combo",
-                                                          static_cast<WUPSButtonCombo_Buttons>(0),
-                                                          sQuickSelectButtonComboHandle,
-                                                          quickSelectComboCallback));
+        bool buttonCombosSupported = false;
+        if (sQuickSelectButtonComboHandle != nullptr && sToggleEmulationButtonComboHandle != nullptr) {
+            buttonCombosSupported = true;
+            settingsCat.add(WUPSConfigItemButtonCombo::Create("quick_select_combination", "Quick Select Combo",
+                                                              static_cast<WUPSButtonCombo_Buttons>(0),
+                                                              sQuickSelectButtonComboHandle,
+                                                              quickSelectComboCallback));
 
-        // TODO default combo?
-        settingsCat.add(WUPSConfigItemButtonCombo::Create("quick_remove_combination", "Toggle Emulation Combo",
-                                                          static_cast<WUPSButtonCombo_Buttons>(0),
-                                                          sToggleEmulationButtonComboHandle,
-                                                          toggleEmulationComboCallback));
+            settingsCat.add(WUPSConfigItemButtonCombo::Create("quick_remove_combination", "Toggle Emulation Combo",
+                                                              static_cast<WUPSButtonCombo_Buttons>(0),
+                                                              sToggleEmulationButtonComboHandle,
+                                                              toggleEmulationComboCallback));
+        }
 
         settingsCat.add(ConfigItemDumpAmiiboCPP::Create("dump_amiibo", "Dump Amiibo",
                                                         (TAG_EMULATION_PATH + "dumps").c_str()));
 
         settingsCat.add(ConfigItemLogCPP::Create("log", "Logs"));
+        if (!buttonCombosSupported) {
+            settingsCat.add(WUPSConfigItemStub::Create("Please update to latest Aroma to be able to use button combos"));
+        }
         root.add(std::move(settingsCat));
     } catch (std::exception& e) {
         DEBUG_FUNCTION_LINE("Creating config menu failed: %s", e.what());
